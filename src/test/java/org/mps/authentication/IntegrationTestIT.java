@@ -1,7 +1,10 @@
 package org.mps.authentication;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 
+import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,6 +31,16 @@ public class IntegrationTestIT {
     @Test
     public void UserRegistration_WhenRegisteringWithWrongPasswordString_ValidationReturnsPASSWORD_INVALID(){
 
+        userRegistration = new UserRegistration();
+        Date date = Mockito.mock(Date.class);
+        PasswordString password = Mockito.mock(PasswordString.class);
+        CredentialStore credential = Mockito.mock(CredentialStore.class);
+
+        when(date.validate()).thenReturn(true);
+        when(password.validate()).thenReturn(false);
+
+
+        Assertions.assertThrows(RuntimeException.class, () -> userRegistration.register(date, password, credential));
     }
 
     @Test
