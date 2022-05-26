@@ -10,14 +10,19 @@ import org.mockito.Mockito;
 public class IntegrationTestIT {
     UserRegistration userRegistration;
     @Test
-    public void UserRegistration_WhenRegisteringWithWrongDate_ValidationReturnsBIRTHDAY_INVALID(){
+    public void UserRegistration_WhenRegisteringWithWrongDate_RegisterThrowsException(){
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
         CredentialValidator credentialValidator = Mockito.mock(CredentialValidator.class);
-        //CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
 
         Mockito.when(date.validate()).thenReturn(false);
+        Mockito.when(passwordString.validate()).thenReturn(true);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
 
+        Assertions.assertThrows(RuntimeException.class, ()->{
+            userRegistration.register(date,passwordString,credentialStore);
+        });
     }
 
     @Test

@@ -12,6 +12,8 @@ public class UserRegistration {
 
     if (status == ValidationStatus.VALIDATION_OK) {
       credentialStore.register(birthDate, passwordString);
+    }else{
+      throw new RuntimeException("VALIDATION ERROR");
     }
   }
 }
