@@ -22,9 +22,10 @@ public class IntegrationTestIT {
         Mockito.when(date.validate()).thenReturn(false);
         Mockito.when(passwordString.validate()).thenReturn(true);
         Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
+        Mockito.when(credentialValidator.validate()).thenReturn(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID);
 
         Assertions.assertThrows(RuntimeException.class, ()->{
-            userRegistration.register(date,passwordString,credentialStore);
+            userRegistration.register(date,passwordString,credentialStore, credentialValidator);
         });
     }
 
@@ -33,14 +34,18 @@ public class IntegrationTestIT {
 
         userRegistration = new UserRegistration();
         Date date = Mockito.mock(Date.class);
-        PasswordString password = Mockito.mock(PasswordString.class);
-        CredentialStore credential = Mockito.mock(CredentialStore.class);
+        PasswordString passwordString = Mockito.mock(PasswordString.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+        CredentialValidator credentialValidator = Mockito.mock(CredentialValidator.class);
 
-        when(date.validate()).thenReturn(true);
-        when(password.validate()).thenReturn(false);
+        Mockito.when(date.validate()).thenReturn(true);
+        Mockito.when(passwordString.validate()).thenReturn(false);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
+        Mockito.when(credentialValidator.validate()).thenReturn(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID);
 
 
-        Assertions.assertThrows(RuntimeException.class, () -> userRegistration.register(date, password, credential));
+        Assertions.assertThrows(RuntimeException.class, () ->
+                userRegistration.register(date, passwordString, credentialStore, credentialValidator));
     }
 
     @Test

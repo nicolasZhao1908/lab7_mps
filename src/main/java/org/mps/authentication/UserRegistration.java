@@ -5,9 +5,8 @@ import org.mps.authentication.CredentialValidator.ValidationStatus;
 public class UserRegistration {
 
   public void register(Date birthDate, PasswordString passwordString,
-      CredentialStore credentialStore) {
+      CredentialStore credentialStore, CredentialValidator credentialValidator) {
 
-    var credentialValidator = new CredentialValidator(birthDate, passwordString, credentialStore);
     ValidationStatus status = credentialValidator.validate();
 
     if (status == ValidationStatus.VALIDATION_OK) {
