@@ -30,7 +30,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void UserRegistration_WhenRegisteringWithWrongPasswordString_ValidationReturnsPASSWORD_INVALID(){
+    public void UserRegistration_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
 
         userRegistration = new UserRegistration();
         Date date = Mockito.mock(Date.class);
@@ -55,6 +55,7 @@ public class IntegrationTestIT {
 
     @Test
     public void UserRegistration_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+
 
     }
 
