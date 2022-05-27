@@ -26,7 +26,6 @@ public class IntegrationTestIT {
 
     @Test
     public void UserRegistration_WhenRegisteringWithWrongDate_RegisterThrowsException(){
-
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
         CredentialValidator credentialValidator = Mockito.mock(CredentialValidator.class);
@@ -186,17 +185,16 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void CredentialStore_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK(){
+    public void CredentialStore_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK() {
 
-        date = new Date(1,1,2001);
+        date = new Date(1, 1, 2001);
         passwordString = new PasswordString("Tabien1?");
         CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
-        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+        credentialValidator = new CredentialValidator(date, passwordString, credentialStore);
 
         Assertions.assertEquals(CredentialValidator.ValidationStatus.VALIDATION_OK, credentialValidator.validate());
+
     }
-
-
     @Test
     public void CredentialStore_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
 
