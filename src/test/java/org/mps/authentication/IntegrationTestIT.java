@@ -1,10 +1,8 @@
 package org.mps.authentication;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
-import org.assertj.core.api.Assert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +21,8 @@ public class IntegrationTestIT {
     public void init(){
         userRegistration = new UserRegistration();
     }
+    @AfterEach
+    public void finish(){userRegistration = null;}
 
     @Test
     public void UserRegistration_WhenRegisteringWithWrongDate_RegisterThrowsException(){
@@ -52,7 +52,7 @@ public class IntegrationTestIT {
         Mockito.when(date.validate()).thenReturn(true);
         Mockito.when(passwordString.validate()).thenReturn(false);
         Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
-        Mockito.when(credentialValidator.validate()).thenReturn(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID);
+        Mockito.when(credentialValidator.validate()).thenReturn(CredentialValidator.ValidationStatus.PASSWORD_INVALID);
 
 
         Assertions.assertThrows(RuntimeException.class, () ->
@@ -60,7 +60,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void UserRegistration_WhenRegisteringWithNonExistingCredentials_ValidationDoesNotThrowException(){
+    public void UserRegistration_WhenRegisteringWithNonExistingCredentials_RegisterDoesNotThrowException(){
 
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
@@ -79,7 +79,7 @@ public class IntegrationTestIT {
 
 
     @Test
-    public void UserRegistration_WhenRegisteringWithExistingCredentials_ValidationThrowsException(){
+    public void UserRegistration_WhenRegisteringWithExistingCredentials_RegisterThrowsException(){
 
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
@@ -95,6 +95,7 @@ public class IntegrationTestIT {
                 userRegistration.register(date, passwordString, credentialStore, credentialValidator));
 
     }
+
 
     @Test
     public void CredentialValidator_WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
@@ -113,7 +114,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void CredentialValidator_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+    public void CredentialValidator_WhenRegisteringWithWrongPasswordString_ValidationReturnsPASSWORD_INVALID(){
 
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
@@ -144,8 +145,6 @@ public class IntegrationTestIT {
         Assertions.assertEquals(CredentialValidator.ValidationStatus.VALIDATION_OK, credentialValidator.validate());
             }
 
-
-
     @Test
     public void CredentialValidator_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
 
@@ -162,8 +161,9 @@ public class IntegrationTestIT {
         Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
     }
 
+
     @Test
-    public void Date_WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
+    public void WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
 
         date = new Date(1,1,1);
         passwordString = new PasswordString("Tabien1?");
@@ -174,7 +174,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void PasswordString_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+    public void WhenRegisteringWithWrongPasswordString_ValidateReturnsPASSWORD_INVALID(){
 
         date = new Date(1,1,2001);
         passwordString = new PasswordString("Tamal");
@@ -185,7 +185,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void CredentialStore_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK() {
+    public void WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK() {
 
         date = new Date(1, 1, 2001);
         passwordString = new PasswordString("Tabien1?");
@@ -196,7 +196,7 @@ public class IntegrationTestIT {
 
     }
     @Test
-    public void CredentialStore_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+    public void WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
 
         date = new Date(1,1,2001);
         passwordString = new PasswordString("Tabien1?");
@@ -221,7 +221,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void CredentialStoreSet_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+    public void CredentialStoreSet_WhenRegisteringWithWrongPasswordString_ValidationReturnsPASSWORD_INVALID(){
 
         date = new Date(1,1,2001);
         passwordString = new PasswordString("Tamal");
@@ -249,14 +249,33 @@ public class IntegrationTestIT {
         date = new Date(1,1,2001);
         passwordString = new PasswordString("Tabien1?");
         credentialStoreSet = new CredentialStoreSet();
-
         credentialStoreSet.register(date, passwordString);
-
         credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
-
         Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
     }
 
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithCorrectCredentials_RegisterCredentials(){
 
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = new CredentialStoreSet();
+        credentialStoreSet.register(date,passwordString);
 
+        Assertions.assertTrue(credentialStoreSet.credentialExists(date,passwordString));
+    }
+
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithExistingCredentials_RegisterThrowsCredentialExistsException(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = new CredentialStoreSet();
+        credentialStoreSet.register(date,passwordString);
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertThrows(CredentialExistsException.class, ()->{
+            credentialStoreSet.register(date, passwordString);
+        });
+    }
 }
