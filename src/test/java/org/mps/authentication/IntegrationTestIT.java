@@ -15,6 +15,9 @@ public class IntegrationTestIT {
 
     private UserRegistration userRegistration;
     private CredentialValidator credentialValidator;
+    private Date date;
+    private PasswordString passwordString;
+    private CredentialStoreSet credentialStoreSet;
 
     @BeforeEach
     public void init(){
@@ -159,6 +162,103 @@ public class IntegrationTestIT {
 
         Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
     }
+
+    @Test
+    public void Date_WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
+
+        date = new Date(1,1,1);
+        passwordString = new PasswordString("Tabien1?");
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void PasswordString_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tamal");
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.PASSWORD_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialStore_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.VALIDATION_OK, credentialValidator.validate());
+    }
+
+
+    @Test
+    public void CredentialStore_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = Mockito.mock(CredentialStoreSet.class);
+
+        when(credentialStoreSet.credentialExists(date, passwordString)).thenReturn(true);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
+
+        date = new Date(1,1,1);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = new CredentialStoreSet();
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tamal");
+        credentialStoreSet = new CredentialStoreSet();
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.PASSWORD_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = new CredentialStoreSet();
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.VALIDATION_OK, credentialValidator.validate());
+    }
+
+
+    @Test
+    public void CredentialStoreSet_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+
+        date = new Date(1,1,2001);
+        passwordString = new PasswordString("Tabien1?");
+        credentialStoreSet = new CredentialStoreSet();
+
+        credentialStoreSet.register(date, passwordString);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStoreSet);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
+    }
+
 
 
 }
