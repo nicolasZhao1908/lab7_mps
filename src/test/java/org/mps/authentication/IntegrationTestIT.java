@@ -14,11 +14,11 @@ import org.mockito.Mockito;
 public class IntegrationTestIT {
 
     private UserRegistration userRegistration;
+    private CredentialValidator credentialValidator;
 
     @BeforeEach
     public void init(){
         userRegistration = new UserRegistration();
-
     }
 
     @Test
@@ -58,7 +58,7 @@ public class IntegrationTestIT {
     }
 
     @Test
-    public void UserRegistration_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK(){
+    public void UserRegistration_WhenRegisteringWithNonExistingCredentials_ValidationDoesNotThrowException(){
 
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
@@ -77,7 +77,7 @@ public class IntegrationTestIT {
 
 
     @Test
-    public void UserRegistration_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+    public void UserRegistration_WhenRegisteringWithExistingCredentials_ValidationThrowsException(){
 
         Date date = Mockito.mock(Date.class);
         PasswordString passwordString = Mockito.mock(PasswordString.class);
@@ -92,6 +92,72 @@ public class IntegrationTestIT {
         Assertions.assertThrows(RuntimeException.class, () ->
                 userRegistration.register(date, passwordString, credentialStore, credentialValidator));
 
+    }
+
+    @Test
+    public void CredentialValidator_WhenRegisteringWithWrongDate_ValidateReturnsBIRTHDAY_INVALID(){
+
+        Date date = Mockito.mock(Date.class);
+        PasswordString passwordString = Mockito.mock(PasswordString.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Mockito.when(date.validate()).thenReturn(false);
+        Mockito.when(passwordString.validate()).thenReturn(true);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.BIRTHDAY_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialValidator_WhenRegisteringWithWrongPasswordString_RegisterThrowsException(){
+
+        Date date = Mockito.mock(Date.class);
+        PasswordString passwordString = Mockito.mock(PasswordString.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Mockito.when(date.validate()).thenReturn(true);
+        Mockito.when(passwordString.validate()).thenReturn(false);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.PASSWORD_INVALID, credentialValidator.validate());
+    }
+
+    @Test
+    public void CredentialValidator_WhenRegisteringWithNonExistingCredentials_ValidationReturnsVALIDATION_OK(){
+
+        Date date = Mockito.mock(Date.class);
+        PasswordString passwordString = Mockito.mock(PasswordString.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Mockito.when(date.validate()).thenReturn(true);
+        Mockito.when(passwordString.validate()).thenReturn(true);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(false);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.VALIDATION_OK, credentialValidator.validate());
+            }
+
+
+
+    @Test
+    public void CredentialValidator_WhenRegisteringWithExistingCredentials_ValidationReturnsEXISTING_CREDENTIAL(){
+
+        Date date = Mockito.mock(Date.class);
+        PasswordString passwordString = Mockito.mock(PasswordString.class);
+        CredentialStore credentialStore = Mockito.mock(CredentialStore.class);
+
+        credentialValidator = new CredentialValidator(date,passwordString,credentialStore);
+
+        Mockito.when(date.validate()).thenReturn(true);
+        Mockito.when(passwordString.validate()).thenReturn(true);
+        Mockito.when(credentialStore.credentialExists(date,passwordString)).thenReturn(true);
+
+        Assertions.assertEquals(CredentialValidator.ValidationStatus.EXISTING_CREDENTIAL, credentialValidator.validate());
     }
 
 
